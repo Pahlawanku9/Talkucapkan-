@@ -10,16 +10,35 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
+      - name: Install JS deps
+        run: |
+          if [ -f "package-lock.json" ]; then npm ci; 
+          elif [ -f "yarn.lock" ]; then yarn install;
+          elif [ -f "package.json" ]; then npm install;
+          fi
+      - name: Fix compileSdk 35 to 34
+        run: |
+          cd android
+          echo "Before fix:"
+          grep -r "compileSdk" app/build.gradle* || true
+          sed -i 's/compileSdk = 35/compileSdk = 34/g' app/build.gradle || true
+          sed -i 's/compileSdkVersion 35/compileSdkVersion 34/g' app/build.gradle || true
+          sed -i 's/compileSdkVersion = 35/compileSdkVersion = 34/g' app/build.gradle || true
+          sed -i 's/targetSdk = 35/targetSdk = 34/g' app/build.gradle || true
+          sed -i 's/targetSdkVersion 35/targetSdkVersion 34/g' app/build.gradle || true
+          echo "After fix:"
+          grep -r "compileSdk" app/build.gradle* || true
       - name: Generate gradlew if missing
         run: |
           cd android
           if [ ! -f "./gradlew" ]; then gradle wrapper --gradle-version 8.7; fi
-          sed -i 's/gradle-.*-all.zip/gradle-8.7-all.zip/' gradle/wrapper/gradle-wrapper.properties || true
           chmod +x ./gradlew
-          cat gradle/wrapper/gradle-wrapper.properties
       - name: Build APK
         run: cd android && ./gradlew assembleDebug --no-daemon --stacktrace
       - name: Upload APK
