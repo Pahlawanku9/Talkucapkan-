@@ -1,72 +1,93 @@
 package com.rambutku.patokmu
 
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VideoCall
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import java.util.Locale
-
-data class Rumah(val judul: String, val harga: String, val lokasi: String, val deskripsi: String)
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.rambutku.patokmu.ui.create.CreateScreen
+import com.rambutku.patokmu.ui.job.JobScreen
+import com.rambutku.patokmu.ui.settings.SettingsScreen
+import com.rambutku.patokmu.ui.theme.TalkingAvatarTheme
+import com.rambutku.patokmu.ui.voices.VoicesScreen
 
 class MainActivity : ComponentActivity() {
-    private var tts: TextToSpeech? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        tts = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale("id", "ID")
-            }
-        }
+        enableEdgeToEdge()
         setContent {
-            MaterialTheme {
-                val listRumah = listOf(
-                    Rumah("Minimalis 2 Lantai", "Rp 350 Juta", "Pedamaran, OKI", "Rumah minimalis 2 lantai di Pedamaran Ogan Komering Ilir, luas tanah 120 meter, harga 350 juta nego"),
-                    Rumah("Subsidi Type 36", "Rp 180 Juta", "Kayuagung", "Rumah subsidi type 36 di Kayuagung, harga 180 juta, siap huni"),
-                    Rumah("Mewah Hook", "Rp 850 Juta", "Palembang", "Rumah mewah posisi hook di Palembang, luas tanah 250 meter, harga 850 juta")
-                )
-                RumahBisaNgomongApp(listRumah) { teks ->
-                    tts?.speak(teks, TextToSpeech.QUEUE_FLUSH, null, null)
-                }
+            TalkingAvatarTheme {
+                TalkingAvatarApp()
             }
         }
-    }
-    override fun onDestroy() {
-        tts?.stop(); tts?.shutdown(); super.onDestroy()
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RumahBisaNgomongApp(list: List<Rumah>, onSpeak: (String) -> Unit) {
-    Scaffold(topBar = { TopAppBar(title = { Text("🔊 Talkucapkan Rumah", fontWeight = FontWeight.Bold) }) }) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(list) { rumah ->
-                Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(6.dp)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("🏠 ${rumah.judul}", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                        Text(rumah.lokasi, color = MaterialTheme.colorScheme.primary)
-                        Text(rumah.harga, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { onSpeak(rumah.deskripsi) }, modifier = Modifier.weight(1f)) {
-                                Text("🔊 Ucapkan")
-                            }
-                            OutlinedButton(onClick = {}, modifier = Modifier.weight(1f)) {
-                                Text("💬 WA")
-                            }
-                        }
+private data class Tab(val route: String, val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+
+@androidx.compose.runtime.Composable
+fun TalkingAvatarApp() {
+    val navController = rememberNavController()
+    val tabs = listOf(
+        Tab("create", "Create", Icons.Filled.VideoCall),
+        Tab("voices", "Voices", Icons.Filled.RecordVoiceOver),
+        Tab("settings", "Settings", Icons.Filled.Settings),
+    )
+    val backStack by navController.currentBackStackEntryAsState()
+    val currentRoute = backStack?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            if (currentRoute?.startsWith("job/") != true) {
+                NavigationBar {
+                    tabs.forEach { tab ->
+                        NavigationBarItem(
+                            selected = currentRoute == tab.route,
+                            onClick = {
+                                navController.navigate(tab.route) {
+                                    popUpTo("create") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            icon = { Icon(tab.icon, contentDescription = tab.label) },
+                            label = { Text(tab.label) },
+                        )
                     }
                 }
+            }
+        }
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = "create",
+            modifier = Modifier.padding(padding),
+        ) {
+            composable("create") {
+                CreateScreen(onJobStarted = { jobId -> navController.navigate("job/$jobId") })
+            }
+            composable("voices") { VoicesScreen() }
+            composable("settings") { SettingsScreen() }
+            composable("job/{jobId}") { entry ->
+                JobScreen(
+                    jobId = entry.arguments?.getString("jobId").orEmpty(),
+                    onDone = { navController.popBackStack("create", inclusive = false) },
+                )
             }
         }
     }
