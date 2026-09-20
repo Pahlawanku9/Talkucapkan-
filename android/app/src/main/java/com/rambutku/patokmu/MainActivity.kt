@@ -1,4 +1,4 @@
-package com.talkingavatar.app
+package com.rambutku.patokmu
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
