@@ -1,26 +1,14 @@
-package com.rambutku.patokmu.data
+package com.rambutku.patokmu.ui.settings
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-
-private val Context.dataStore by preferencesDataStore(name = "settings")
-
-/** Backend connection settings — the Modal URL and API token from `modal deploy`. */
-class SettingsStore(private val context: Context) {
-    private val keyBaseUrl = stringPreferencesKey("base_url")
-    private val keyToken = stringPreferencesKey("api_token")
-
-    val baseUrl: Flow<String> = context.dataStore.data.map { it[keyBaseUrl] ?: "" }
-    val token: Flow<String> = context.dataStore.data.map { it[keyToken] ?: "" }
-
-    suspend fun save(baseUrl: String, token: String) {
-        context.dataStore.edit {
-            it[keyBaseUrl] = baseUrl.trim()
-            it[keyToken] = token.trim()
-        }
+@Composable
+fun SettingsScreen() {
+    Column(Modifier.padding(16.dp)) {
+        Text("Settings - Versi Rumah")
+        Text("Belum pakai server, jadi settings kosong dulu ya Mas.")
     }
 }
