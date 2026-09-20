@@ -12,14 +12,14 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.5
+          gradle-version: 8.7
       - name: Generate gradlew if missing
         run: |
           cd android
-          ls -la
-          if [ ! -f "./gradlew" ]; then gradle wrapper --gradle-version 8.5; fi
+          if [ ! -f "./gradlew" ]; then gradle wrapper --gradle-version 8.7; fi
+          sed -i 's/gradle-.*-all.zip/gradle-8.7-all.zip/' gradle/wrapper/gradle-wrapper.properties || true
           chmod +x ./gradlew
-          ls -la
+          cat gradle/wrapper/gradle-wrapper.properties
       - name: Build APK
         run: cd android && ./gradlew assembleDebug --no-daemon --stacktrace
       - name: Upload APK
