@@ -1,4 +1,4 @@
-package com.rambutku.patokmu
+package com.talkingavatar.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -20,11 +20,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.rambutku.patokmu.ui.create.CreateScreen
-import com.rambutku.patokmu.ui.job.JobScreen
-import com.rambutku.patokmu.ui.settings.SettingsScreen
-import com.rambutku.patokmu.ui.theme.TalkingAvatarTheme
-import com.rambutku.patokmu.ui.voices.VoicesScreen
+import com.talkingavatar.app.ui.create.CreateScreen
+import com.talkingavatar.app.ui.job.JobScreen
+import com.talkingavatar.app.ui.settings.SettingsScreen
+import com.talkingavatar.app.ui.theme.TalkingAvatarTheme
+import com.talkingavatar.app.ui.voices.VoicesScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
