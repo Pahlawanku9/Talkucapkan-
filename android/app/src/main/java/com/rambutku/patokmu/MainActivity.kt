@@ -3,28 +3,34 @@ package com.rambutku.patokmu
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
-import com.rambutku.patokmu.ui.create.CreateScreen
-import com.rambutku.patokmu.ui.job.JobScreen
-import com.rambutku.patokmu.ui.theme.TalkucapkanTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TalkucapkanTheme {
-                var currentJobId by remember { mutableStateOf<String?>(null) }
-                
-                if (currentJobId == null) {
-                    CreateScreen(onJobStarted = { jobId ->
-                        currentJobId = jobId
-                    })
-                } else {
-                    JobScreen(jobId = currentJobId!!, onDone = {
-                        currentJobId = null
-                    })
+            MaterialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Greeting()
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun Greeting() {
+    Text(text = "Talkucapkan Rumah - Build Berhasil!")
 }
